@@ -18,10 +18,10 @@ local nvim_command          = vim.api.nvim_command
 local new_timer    = vim.uv.new_timer
 local new_fs_event = vim.uv.new_fs_event
 
-local getfsize = vim.fn.getfsize
-local expand   = vim.fn.expand
-local finddir  = vim.fn.finddir
-local findfile  = vim.fn.findfile
+local getfsize    = vim.fn.getfsize
+local expand      = vim.fn.expand
+local finddir     = vim.fn.finddir
+local findfile    = vim.fn.findfile
 local fnamemodify = vim.fn.fnamemodify
 
 ------------------------------------------------------------------------

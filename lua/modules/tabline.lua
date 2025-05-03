@@ -41,7 +41,6 @@ local M = {}
 
 function M.get_tabline()
     sb:reset()
-	local tabline = ''
 
     local current_buf = nvim_get_current_buf()
     for _, v  in pairs(nvim_list_bufs()) do
@@ -88,18 +87,24 @@ function M.get_tabline()
     end
 
     sb:put('%=')
-	-- tabline = tabline .. '%='
 
     local current_tab = nvim_get_current_tabpage()
     for _, val in ipairs(tab_list) do
-        local windows = #vim.api.nvim_tabpage_list_wins(val)
+        local win_count = 0
+        local windows = vim.api.nvim_tabpage_list_wins(val)
+        for _, v in ipairs(windows) do
+            local b = vim.api.nvim_win_get_buf(v)
+            if nvim_get_option_value('buflisted', { buf = b }) then
+                win_count = win_count + 1
+            end
+        end
         if val == current_tab then
             sb:putf('%%#TabLineSelSeparator# %s', left_separator)
-            sb:putf('%%#TabLineSel# %s', windows)
+            sb:putf('%%#TabLineSel# %s', win_count)
             sb:putf(' %%#TabLineSelSeparator#%s', right_separator)
         else
             sb:putf('%%#TabLineSeparator# %s', left_separator)
-            sb:putf('%%#TabLine# %s', windows)
+            sb:putf('%%#TabLine# %s', win_count)
             sb:putf(' %%#TabLineSeparator#%s', right_separator)
         end
     end
