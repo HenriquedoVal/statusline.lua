@@ -9,3 +9,5 @@ Changes:
 - Better load time
 - tabline now shows current buffers
 - smoother lsp messages display
+
+![example](example.gif)
