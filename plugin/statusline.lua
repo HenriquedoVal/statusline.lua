@@ -25,6 +25,11 @@ vim.api.nvim_create_autocmd('DiagnosticChanged', {command = 'redrawstatus!'})
 vim.api.nvim_set_hl(0, 'TabLine', {})
 vim.api.nvim_set_hl(0, 'TabLineSel', {})
 vim.api.nvim_set_hl(0, 'TabLineFill', {})
+vim.api.nvim_create_autocmd('ColorScheme', {
+    callback = function(_ev)
+        require('modules.tabline').set_tabline_colors()
+    end
+})
 
 vim.api.nvim_set_option_value(
     "tabline", "%!v:lua.require'modules.tabline'.get_tabline()", {}

@@ -17,6 +17,7 @@ local left_separator = ''
 local right_separator = ''
 local space = ' '
 
+---@type string|integer
 local blue   = '#83a598'
 local color2 = '#292929'
 local color3 = '#504945'
@@ -25,19 +26,26 @@ local color4 = '#b8b894'
 local sb = string_buffer.new(100)
 
 
---- Init ---
-
-nvim_set_hl(0, 'TabLine',             { bg = color3, fg = color4})
-nvim_set_hl(0, 'TabLineSel',          { bold = true, bg = blue, fg = color2})
-nvim_set_hl(0, 'TabLineFill',         {})
-
-nvim_set_hl(0, 'TabLineSeparator',    { fg = color3})
-nvim_set_hl(0, 'TabLineSelSeparator', { bold = true, fg = blue})
-
-
 --- Tabline ---
 
 local M = {}
+
+function M.set_tabline_colors()
+    -- local identifier = vim.api.nvim_get_hl(0, {
+    --     name = 'Identifier',
+    --     link = false,
+    --     create =false
+    -- })
+    -- if identifier and identifier.fg then
+    --     blue = identifier.fg
+    -- end
+    nvim_set_hl(0, 'TabLine',             { bg = color3, fg = color4})
+    nvim_set_hl(0, 'TabLineSel',          { bold = true, bg = blue, fg = color2})
+    nvim_set_hl(0, 'TabLineFill',         {})
+
+    nvim_set_hl(0, 'TabLineSeparator',    { fg = color3})
+    nvim_set_hl(0, 'TabLineSelSeparator', { bold = true, fg = blue})
+end
 
 function M.get_tabline()
     sb:reset()
@@ -111,5 +119,11 @@ function M.get_tabline()
 
 	return sb:tostring()
 end
+
+
+--- Init ---
+
+M.set_tabline_colors()
+
 
 return M
