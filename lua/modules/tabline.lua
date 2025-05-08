@@ -4,14 +4,8 @@ local string_buffer = require('string.buffer')
 
 local devicons = require('tables._icons')
 
-local nvim_set_hl              = vim.api.nvim_set_hl
-local nvim_list_tabpages       = vim.api.nvim_list_tabpages
-local nvim_get_current_tabpage = vim.api.nvim_get_current_tabpage
-local nvim_list_bufs           = vim.api.nvim_list_bufs
-local nvim_get_current_buf     = vim.api.nvim_get_current_buf
-local nvim_get_option_value    = vim.api.nvim_get_option_value
 
-local fnamemodify = vim.fn.fnamemodify
+--- Globals ---
 
 local left_separator = ''
 local right_separator = ''
@@ -39,20 +33,20 @@ function M.set_tabline_colors()
     -- if identifier and identifier.fg then
     --     blue = identifier.fg
     -- end
-    nvim_set_hl(0, 'TabLine',             { bg = color3, fg = color4})
-    nvim_set_hl(0, 'TabLineSel',          { bold = true, bg = blue, fg = color2})
-    nvim_set_hl(0, 'TabLineFill',         {})
+    vim.api.nvim_set_hl(0, 'TabLine',             { bg = color3, fg = color4})
+    vim.api.nvim_set_hl(0, 'TabLineSel',          { bold = true, bg = blue, fg = color2})
+    vim.api.nvim_set_hl(0, 'TabLineFill',         {})
 
-    nvim_set_hl(0, 'TabLineSeparator',    { fg = color3})
-    nvim_set_hl(0, 'TabLineSelSeparator', { bold = true, fg = blue})
+    vim.api.nvim_set_hl(0, 'TabLineSeparator',    { fg = color3})
+    vim.api.nvim_set_hl(0, 'TabLineSelSeparator', { bold = true, fg = blue})
 end
 
 function M.get_tabline()
     sb:reset()
 
-    local current_buf = nvim_get_current_buf()
-    for _, v  in pairs(nvim_list_bufs()) do
-        if nvim_get_option_value('buflisted', { buf = v }) then
+    local current_buf = vim.api.nvim_get_current_buf()
+    for _, v  in pairs(vim.api.nvim_list_bufs()) do
+        if vim.api.nvim_get_option_value('buflisted', { buf = v }) then
 
             local icon
             local file_name = vim.api.nvim_buf_get_name(v)
@@ -62,7 +56,7 @@ function M.get_tabline()
                 icon = devicons.devicon_table['terminal']
             end
 
-            file_name = fnamemodify(file_name, ":p:t")
+            file_name = vim.fn.fnamemodify(file_name, ":p:t")
             if icon == nil then
                 icon = devicons.devicon_table[file_name]
             end
@@ -73,7 +67,7 @@ function M.get_tabline()
             if icon ~= nil then
                 file_name =  icon .. space .. file_name
             end
-            if nvim_get_option_value('modified', { buf = v }) then
+            if vim.api.nvim_get_option_value('modified', { buf = v }) then
                 file_name = file_name .. space .. '+'
             end
 
@@ -89,20 +83,20 @@ function M.get_tabline()
         end
 	end
 
-    local tab_list = nvim_list_tabpages()
+    local tab_list = vim.api.nvim_list_tabpages()
     if #tab_list == 1 then
         return sb:tostring()
     end
 
     sb:put('%=')
 
-    local current_tab = nvim_get_current_tabpage()
+    local current_tab = vim.api.nvim_get_current_tabpage()
     for _, val in ipairs(tab_list) do
         local win_count = 0
         local windows = vim.api.nvim_tabpage_list_wins(val)
         for _, v in ipairs(windows) do
             local b = vim.api.nvim_win_get_buf(v)
-            if nvim_get_option_value('buflisted', { buf = b }) then
+            if vim.api.nvim_get_option_value('buflisted', { buf = b }) then
                 win_count = win_count + 1
             end
         end

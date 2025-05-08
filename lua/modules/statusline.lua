@@ -7,23 +7,6 @@ local string_buffer = require('string.buffer')
 local modes_table = require('tables._modes')
 local devicons    = require('tables._icons')
 
-local nvim_set_hl           = vim.api.nvim_set_hl
-local nvim_get_current_buf  = vim.api.nvim_get_current_buf
-local nvim_list_bufs        = vim.api.nvim_list_bufs
-local nvim_get_option_value = vim.api.nvim_get_option_value
-local nvim_get_mode         = vim.api.nvim_get_mode
-local nvim_buf_get_name     = vim.api.nvim_buf_get_name
-local nvim_command          = vim.api.nvim_command
-
-local new_timer    = vim.uv.new_timer
-local new_fs_event = vim.uv.new_fs_event
-
-local getfsize    = vim.fn.getfsize
-local expand      = vim.fn.expand
-local finddir     = vim.fn.finddir
-local findfile    = vim.fn.findfile
-local fnamemodify = vim.fn.fnamemodify
-
 ------------------------------------------------------------------------
 --                             Globals                                --
 ------------------------------------------------------------------------
@@ -47,9 +30,9 @@ local lsp_is_required = false
 local current_spinner = ''
 local current_spinner_idx = -1
 
-local git_head_file_event = new_fs_event()
-local erase_lsp_msg_timer = new_timer()
-local spinner_timer = new_timer()
+local git_head_file_event = vim.uv.new_fs_event()
+local erase_lsp_msg_timer = vim.uv.new_timer()
+local spinner_timer = vim.uv.new_timer()
 
 local sb = string_buffer.new(100)
 
@@ -60,15 +43,15 @@ local sb = string_buffer.new(100)
 -- Returns full path to git directory for current directory
 local function find_git_dir()
 	-- get file dir so we can search from that dir
-	local file_dir = expand('%:p:h') .. ';'
+	local file_dir = vim.fn.expand('%:p:h') .. ';'
 	-- find .git/ folder genaral case
-	local git_dir = finddir('.git', file_dir)
+	local git_dir = vim.fn.finddir('.git', file_dir)
 	-- find .git file in case of submodules or any other case git dir is in
 	-- any other place than .git/
-	local git_file = findfile('.git', file_dir)
+	local git_file = vim.fn.findfile('.git', file_dir)
 	-- for some weird reason findfile gives relative path so expand it to fullpath
 	if #git_file > 0 then
-		git_file = fnamemodify(git_file, ':p')
+		git_file = vim.fn.fnamemodify(git_file, ':p')
 	end
 	if #git_file > #git_dir then
 		-- separate git-dir or submodule is used
@@ -163,7 +146,7 @@ local function set_lsp_msg(msg)
 
     erase_lsp_msg_timer:start(2000, 0, vim.schedule_wrap(function()
         lsp_msg = ''
-        nvim_command('redrawstatus!')
+        vim.api.nvim_command('redrawstatus!')
     end))
 
 	lsp_msg = res
@@ -198,7 +181,7 @@ local function get_lsp_msg()
 end
 
 local function get_file_icon()
-	local file_name = nvim_buf_get_name(0)
+	local file_name = vim.api.nvim_buf_get_name(0)
 	if string.find(file_name, 'term://') ~= nil then
         file_name = 'terminal'
     elseif string.find(file_name, 'health://') ~= nil then
@@ -215,10 +198,10 @@ end
 
 -- Returns the buffer name with term and health handling
 local function get_buffer_name()
-	local filename = expand('%:.')
+	local filename = vim.fn.expand('%:.')
 
     if string.find(filename, 'term://') ~= nil then
-        local shell = expand('%:t') .. space
+        local shell = vim.fn.fnamemodify(filename, ':t') .. space
 
         -- Vim's pattern is 'path/to/shell//<pid>:'
         local tmp = string.sub(filename, string.find(filename,  '//%d+'))
@@ -244,11 +227,11 @@ end
 
 -- Returns formated string with current file size
 local function get_file_size()
-	local file = expand('%:p')
+	local file = vim.api.nvim_buf_get_name(0)
 	if #file == 0 then
 		return ''
 	end
-	local size = getfsize(file)
+	local size = vim.fn.getfsize(file)
 	if size <= 0 then
 		return ''
 	end
@@ -267,9 +250,9 @@ end
 -- Returns a string with 'b <current_bufnr>/<bufqtt>'
 local function get_buffer_qtt()
     local bufqtt = 0
-    local current_buf = nvim_get_current_buf()
-    for _, v  in pairs(nvim_list_bufs()) do
-        if nvim_get_option_value('buflisted', { buf = v }) then
+    local current_buf = vim.api.nvim_get_current_buf()
+    for _, v  in pairs(vim.api.nvim_list_bufs()) do
+        if vim.api.nvim_get_option_value('buflisted', { buf = v }) then
             bufqtt = bufqtt + 1
         end
     end
@@ -278,9 +261,9 @@ end
 
 -- Returns '+ ' if any buffer other than current buffer is modified
 local function get_modified()
-    local current_buf = nvim_get_current_buf()
-    for _, v  in pairs(nvim_list_bufs()) do
-        if v ~= current_buf and nvim_get_option_value('modified', { buf = v }) then
+    local current_buf = vim.api.nvim_get_current_buf()
+    for _, v  in pairs(vim.api.nvim_list_bufs()) do
+        if v ~= current_buf and vim.api.nvim_get_option_value('modified', { buf = v }) then
             return '+ '
         end
     end
@@ -290,24 +273,24 @@ end
 -- Change colors for different mode
 local function set_mode_colors(mode)
 	if mode == 'n' then
-        nvim_set_hl(0, 'Mode', { fg = black_fg, bg = green, bold = true })
-        nvim_set_hl(0, 'ModeSeparator', { fg = green })
+        vim.api.nvim_set_hl(0, 'Mode', { fg = black_fg, bg = green, bold = true })
+        vim.api.nvim_set_hl(0, 'ModeSeparator', { fg = green })
 	end
 	if mode == 'i' then
-        nvim_set_hl(0, 'Mode', { fg = black_fg, bg = blue, bold = true })
-        nvim_set_hl(0, 'ModeSeparator', { fg = blue })
+        vim.api.nvim_set_hl(0, 'Mode', { fg = black_fg, bg = blue, bold = true })
+        vim.api.nvim_set_hl(0, 'ModeSeparator', { fg = blue })
 	end
 	if mode == 'v' or mode == 'V' or mode == '^V' then
-        nvim_set_hl(0, 'Mode', { fg = black_fg, bg = purple, bold = true })
-        nvim_set_hl(0, 'ModeSeparator', { fg = purple })
+        vim.api.nvim_set_hl(0, 'Mode', { fg = black_fg, bg = purple, bold = true })
+        vim.api.nvim_set_hl(0, 'ModeSeparator', { fg = purple })
 	end
 	if mode == 'c' then
-        nvim_set_hl(0, 'Mode', { fg = black_fg, bg = yellow, bold = true })
-        nvim_set_hl(0, 'ModeSeparator', { fg = yellow })
+        vim.api.nvim_set_hl(0, 'Mode', { fg = black_fg, bg = yellow, bold = true })
+        vim.api.nvim_set_hl(0, 'ModeSeparator', { fg = yellow })
 	end
 	if mode == 't' or mode == 'nt' then
-        nvim_set_hl(0, 'Mode', { fg = black_fg, bg = red, bold = true })
-        nvim_set_hl(0, 'ModeSeparator', { fg = red })
+        vim.api.nvim_set_hl(0, 'Mode', { fg = black_fg, bg = red, bold = true })
+        vim.api.nvim_set_hl(0, 'ModeSeparator', { fg = red })
 	end
 end
 
@@ -324,7 +307,7 @@ spinner_timer:start(0, 120, vim.schedule_wrap(function()
     current_spinner_idx = current_spinner_idx + 1
     current_spinner = spinners[current_spinner_idx % #spinners + 1]
 
-    nvim_command('redrawstatus!')
+    vim.api.nvim_command('redrawstatus!')
 end))
 
 vim.api.nvim_create_autocmd('LspAttach', {
@@ -343,7 +326,7 @@ local M = {}
 
 function M.get_statusline()
 	-- Mode
-	local mode = nvim_get_mode()['mode']
+	local mode = vim.api.nvim_get_mode()['mode']
 	set_mode_colors(mode)
 
     sb:put('%#ModeSeparator#')
