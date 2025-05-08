@@ -18,7 +18,6 @@ vim.api.nvim_set_option_value(
     "statusline", "%!v:lua.require'modules.statusline'.get_statusline()", {}
 )
 vim.api.nvim_create_autocmd('LspProgress', {command = 'redrawstatus!'})
-vim.api.nvim_create_autocmd('DiagnosticChanged', {command = 'redrawstatus!'})
 
 --- Set Tabline ---
 

@@ -41,6 +41,7 @@ local black_fg = '#282c34'
 
 local os_path_sep = package.config:sub(1, 1)
 local git_branch = ''
+local current_diagnostics = ''
 local lsp_msg = ''
 local lsp_is_required = false
 local current_spinner = ''
@@ -126,7 +127,7 @@ local function get_git_branch()
 	return icon .. space .. git_branch .. space
 end
 
-local function get_diagnostics()
+local function set_diagnostics()
 	local diag = ''
 	local e, w, i, h
     local res = { 0, 0, 0, 0 }
@@ -142,7 +143,8 @@ local function get_diagnostics()
 	diag = w ~= 0 and diag .. ' ' .. w .. space or diag
 	diag = i ~= 0 and diag .. ' ' .. i .. space or diag
 	diag = h ~= 0 and diag .. ' ' .. h .. space or diag
-	return diag
+
+    current_diagnostics = diag
 end
 
 local function set_lsp_msg(msg)
@@ -332,6 +334,7 @@ vim.api.nvim_create_autocmd('LspAttach', {
     end
 })
 
+vim.api.nvim_create_autocmd('DiagnosticChanged', {callback = set_diagnostics})
 
 ------------------------------------------------------------------------
 --                              Statusline                            --
@@ -356,7 +359,7 @@ function M.get_statusline()
     sb:put(get_file_icon())
 
 	-- Native Nvim LSP Diagnostic
-    sb:put(get_diagnostics())
+    sb:put(current_diagnostics)
 
 	-- git branch name
     sb:put(get_git_branch())
