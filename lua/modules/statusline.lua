@@ -317,7 +317,7 @@ vim.api.nvim_create_autocmd('LspAttach', {
     end
 })
 
-vim.api.nvim_create_autocmd('DiagnosticChanged', {callback = set_diagnostics})
+vim.api.nvim_create_autocmd({'DiagnosticChanged', 'BufEnter'}, {callback = set_diagnostics})
 
 ------------------------------------------------------------------------
 --                              Statusline                            --
