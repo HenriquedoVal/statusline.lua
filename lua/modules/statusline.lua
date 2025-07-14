@@ -174,7 +174,7 @@ local function get_lsp_msg()
 
     local final_msg = ''
     if #lsp_msg > 0 then
-        final_msg = '    ' .. current_spinner .. space .. lsp_msg
+        final_msg = lsp_msg .. space .. current_spinner .. space
     end
 
     return final_msg
@@ -341,17 +341,17 @@ function M.get_statusline()
     sb:put(get_buffer_name())
     sb:put(get_file_icon())
 
-	-- Native Nvim LSP Diagnostic
-    sb:put(current_diagnostics)
-
 	-- git branch name
     sb:put(get_git_branch())
+
+	-- Alignment to left
+    sb:put('%=')
 
 	--Lsp Progress
     sb:put(get_lsp_msg())
 
-	-- Alignment to left
-    sb:put('%=')
+	-- Native Nvim LSP Diagnostic
+    sb:put(current_diagnostics)
 
 	-- FileSize, Modified, Row/Col
     sb:put('%m ')
