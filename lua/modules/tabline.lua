@@ -52,10 +52,13 @@ function M.get_tabline()
             local file_name = vim.api.nvim_buf_get_name(v)
             if string.find(file_name, 'health://') ~= nil then
                 file_name = 'checkhealth'
-            elseif string.find(file_name, 'term://') ~= nil then
-                icon = devicons.devicon_table['terminal']
+            elseif vim.api.nvim_get_option_value('filetype', { buf = v }) == 'qf' then
+                file_name = 'quickfix'
             end
 
+            if string.find(file_name, 'term://') ~= nil then
+                icon = devicons.devicon_table['terminal']
+            end
             file_name = vim.fn.fnamemodify(file_name, ":p:t")
             if icon == nil then
                 icon = devicons.devicon_table[file_name]
